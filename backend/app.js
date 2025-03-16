@@ -2,10 +2,16 @@ const express=require('express');
 const mdb=require("mongoose");
 const dotenv=require("dotenv");
 const bcrypt=require("bcrypt");
-const signSchema=require("./models/SignUp")
+const User=require("./models/SignUp");
+const Job = require("./models/Job");
+const Application=require("./models/Application")
+const cors=require("cors");
+const multer=require("multer")
 
 const app=express();
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 const port=process.env.PORT || 8000;
 dotenv.config();
 
@@ -17,31 +23,66 @@ mdb.connect(process.env.MONGODB)
 }).catch(err=>{
     console.log("Error connecting to MongoDB",err);
 });
-app.post("/signup",async (req,res)=>{
-    try{
-        const {name,email,password}=req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newSignup=new signSchema({
-            name,
-            email,
-            password:hashedPassword
-        });
-        newSignup.save();
-        console.log("name,email,password",name,email,password);
-        res.send({msg:"Signup Successfull"});
-    }catch(err){
-        console.log("Error in signup",err);
-        res.status(400).send("Error in signup");
+
+//List all jobs
+app.get("/jobs", async (req, res) => {
+    try {
+      const jobs = await Job.find(); 
+      res.status(200).json(jobs);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
 });
-app.post("/delete",(req,res)=>{
-    signSchema.deleteMany({name:"Prakash"});
-    res.send({msg:"Deleted"});
-})
+
+//view job description
+
+app.get("/jobs/:id", async (req, res) => {
+    try {
+      const job = await Job.findById(req.params.id);
+      if (!job) return res.status(404).json({ message: "Job not found" });
+      res.json(job);
+    } catch (error) {
+      res.status(500).json({ message: "Server Error" });
+    }
+});
+
+
+//Authentication
+app.post("/signup", async (req, res) => {
+  try {
+    const { firstName, lastName, email, password, phoneNumber } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ error: "Email already in use" });
+
+    // Hash the password before saving
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Create new user with hashed password
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+    });
+
+    await newUser.save();
+
+    res.status(201).json({ message: "Signup successful! Please log in." });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 app.post("/login",async (req,res)=>{
     try{
         const {email,password}=req.body;
-        const user=await signSchema.findOne({email});
+        const user=await User.findOne({email});
         if(!user){
             return res.status(404).json({message:"Enter valid User"});
         }
@@ -58,8 +99,64 @@ app.post("/login",async (req,res)=>{
     }
 });
 
+
+// Job Application
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads/resumes"); // Directory where resumes will be stored
+    },
+    filename: (req, file, cb) => {
+      cb(null, `${Date.now()}-${file.originalname}`);
+    },
+  });
+  
+  // Multer middleware for handling file uploads
+  const upload = multer({ storage });
+  
+  // POST route to handle job applications
+  app.post("/applications", upload.single("resume"), async (req, res) => {
+    try {
+      const applicationData = { ...req.body, resume: req.file.filename };
+      const application = new Application(applicationData);
+      await application.save();
+      res.status(201).json({ message: "Application submitted successfully!" });
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      res.status(500).json({ error: "Failed to submit application" });
+    }
+  });
+
+
+
+// POST a new job
+app.post("/post-jobs",  async (req, res) => {
+  try {
+    const recruiterId = req.user.id; 
+    const newJob = new Job({
+      ...req.body, 
+      recruiterId,
+    });
+
+    await newJob.save(); 
+    res.status(201).json({ message: "Job posted successfully", job: newJob });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/my-jobs", async (req, res) => {
+  try {
+    const recruiterId = req.user.id;
+    const jobs = await Job.find({ recruiter: recruiterId }); 
+    res.json(jobs);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching jobs" });
+  }
+});
+
+
 app.get('/',(req,res)=>{
-    res.sendFile("C:/PRAKASH/SJITMERN/backend/index.html");
+    res.send("Welcome")
 }
 );
 

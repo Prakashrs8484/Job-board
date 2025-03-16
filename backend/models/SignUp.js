@@ -1,18 +1,40 @@
-const mdb=require("mongoose");
-const signSchema=new mdb.Schema({
-    name:{
-        type:String,
-        required:true
-    },
-    email:{
-        type:String,
-        required:true
-    },
-    password:{
-        type:String,
-        required:true
-    }
-});
-const signup_schema=mdb.model("signup_schema",signSchema);
-module.exports=signup_schema;
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
 
+const UserSchema = new mongoose.Schema({
+  firstName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+    unique: true,
+    match: [/^\d{10}$/, "Invalid phone number format"],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+
+module.exports = mongoose.model("User", UserSchema);
