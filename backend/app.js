@@ -83,6 +83,7 @@ app.post("/login",async (req,res)=>{
     try{
         const {email,password}=req.body;
         const user=await User.findOne({email});
+        const recruiterId=user._id;
         if(!user){
             return res.status(404).json({message:"Enter valid User"});
         }
@@ -90,7 +91,7 @@ app.post("/login",async (req,res)=>{
         if(!isMatch){
             return res.status(400).json({message:"Invalid Password"});
         }
-        res.status(200).json({message:"Valid user"});
+        res.status(200).json({message:"Valid user",recruiterId});
         console.log("Valid")
     }catch(err)
     {
@@ -131,12 +132,11 @@ const storage = multer.diskStorage({
 // POST a new job
 app.post("/post-jobs",  async (req, res) => {
   try {
-    const recruiterId = req.user.id; 
+    console.log(req.body);
     const newJob = new Job({
       ...req.body, 
-      recruiterId,
     });
-
+    console.log(newJob.recruiterId)
     await newJob.save(); 
     res.status(201).json({ message: "Job posted successfully", job: newJob });
   } catch (error) {
@@ -144,9 +144,11 @@ app.post("/post-jobs",  async (req, res) => {
   }
 });
 
+
+//Get my-jobs
 app.get("/my-jobs", async (req, res) => {
   try {
-    const recruiterId = req.user.id;
+    const recruiterId = req.headers.recruiterid;
     const jobs = await Job.find({ recruiter: recruiterId }); 
     res.json(jobs);
   } catch (error) {
@@ -154,6 +156,26 @@ app.get("/my-jobs", async (req, res) => {
   }
 });
 
+//Update job
+app.put("/jobs/:id", async (req, res) => {
+  try {
+    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    res.json(job);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating job", error });
+  }
+});
+//delete job
+app.delete("/jobs/:id", async (req, res) => {
+  try {
+    const job = await Job.findByIdAndDelete(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    res.json({ message: "Job deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting job", error });
+  }
+});
 
 app.get('/',(req,res)=>{
     res.send("Welcome")

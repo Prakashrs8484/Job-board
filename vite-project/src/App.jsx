@@ -13,7 +13,7 @@ import RecruiterHome from "./components/Recruiter/RecruiterHome";
 import Dashboard from "./components/Recruiter/DashBoard";
 import MyJobs from "./components/Recruiter/MyJobs";
 import AuthProvider from "./components/context/AuthContext";
-
+import JobApplication from "./components/Recruiter/JobApplication";
 
 const App = () => {
   const [isAuthenticated, setisAuthenticated] = useState(false);
@@ -55,6 +55,16 @@ const App = () => {
         }
         />
 
+        <Route
+          path="/job-applications"
+          element={
+            <RecruiterPage>
+              <JobApplication isAuthenticated={isAuthenticated} setisAuthenticated={setisAuthenticated}/>
+            </RecruiterPage>
+          }
+        />
+
+
         <Route path="/" element={<Navbar isAuthenticated={isAuthenticated} setisAuthenticated={setisAuthenticated} />} />
       </Routes>
 
@@ -63,7 +73,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login setisAuthenticated={setisAuthenticated} />} />
         <Route path="/job/:id" element={<JobDetails />} />
-        <Route path="/applications" element={<Application />} />
+        <Route path="/application" element={<Application />} />
       </Routes>
     </BrowserRouter>
     </AuthProvider>

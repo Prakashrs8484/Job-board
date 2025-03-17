@@ -20,7 +20,7 @@ const RecruiterHome = ({ isAuthenticated, setisAuthenticated }) => {
 
       {/* Navigation Links */}
       <div className="flex items-center space-x-8">
-        <Link to="/recruiter" className="text-gray-700 hover:text-primary">
+        <Link to="/" className="text-gray-700 hover:text-primary">
           Home
         </Link>
 

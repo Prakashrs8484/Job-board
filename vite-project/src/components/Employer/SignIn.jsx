@@ -15,7 +15,7 @@ const SignIn = () => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:8000/signup", {
+      const response = await axios.post("https://job-board-pbyz.onrender.com/signup", {
         firstName,
         lastName,
         email,

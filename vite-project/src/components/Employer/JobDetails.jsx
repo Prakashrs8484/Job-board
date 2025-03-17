@@ -33,7 +33,7 @@ const JobDetails = ({ job }) => {
   const Navigate = useNavigate()
   const handleApplication = (event) => {
     event.preventDefault();
-    Navigate("/applications")
+    Navigate("/application")
   }
 
   return (

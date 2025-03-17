@@ -34,7 +34,7 @@ const ApplicationForm = ({ jobId }) => {
     });
     formDataToSend.append("jobId", jobId);
     try {
-      await axios.post("http://localhost:8000/applications", formDataToSend, {
+      await axios.post("https://job-board-pbyz.onrender.com/applications", formDataToSend, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Application submitted successfully!");

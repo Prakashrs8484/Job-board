@@ -14,11 +14,11 @@ const Login = ({setisAuthenticated}) => {
     e.preventDefault();
     
     try {
-      const response = await axios.post("http://localhost:8000/login", { email, password });
+      const response = await axios.post("https://job-board-pbyz.onrender.com//login", { email, password });
 
       if (response.data.message) {
         const recruiterId = response.data.recruiterId;
-
+        console.log("Recruiter ID:", recruiterId);
         setisAuthenticated(true);
         setRecruiterId(recruiterId); // Set recruiter ID in context
         localStorage.setItem("recruiterId", recruiterId); // Store in local storage

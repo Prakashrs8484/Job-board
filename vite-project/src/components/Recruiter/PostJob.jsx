@@ -1,9 +1,10 @@
 import React, { useContext, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext"; // Import context
+import { useNavigate } from "react-router-dom";
 
 const PostJob = () => {
-  const { recruiterId } = useContext(AuthContext); // Get recruiter ID
+  const recruiterId = localStorage.getItem("recruiterId");
   const [jobDetails, setJobDetails] = useState({
     companyName: "",
     logo: "",
@@ -23,17 +24,17 @@ const PostJob = () => {
     qualifications: "",
     benefits: "",
   });
-
+  const navigate = useNavigate();
   const handleChange = (e) => {
-    setJobDetails({ ...jobDetails, [e.target.name]: e.target.value });
+    setJobDetails({ ...jobDetails, [e.target.name]: e.target.value },recruiterId);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
-      const response = await axios.post("http://localhost:8000/post-job", 
-        { ...jobDetails, recruiterId }, // Include recruiter ID
+      const response = await axios.post("https://job-board-pbyz.onrender.com/post-jobs", 
+        { ...jobDetails, recruiterId },
         { headers: { "Content-Type": "application/json" } }
       );
 
@@ -59,6 +60,7 @@ const PostJob = () => {
           benefits: "",
         });
       }
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error posting job:", error);
       alert("Failed to post job. Please try again.");

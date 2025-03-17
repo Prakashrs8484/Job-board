@@ -11,7 +11,7 @@ const JobList = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/jobs");
+        const response = await axios.get("https://job-board-pbyz.onrender.com/jobs");
         setJobs(response.data);
       } catch (error) {
         console.error("Error fetching jobs:", error);
