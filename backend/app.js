@@ -9,7 +9,7 @@ const cors=require("cors");
 const multer=require("multer")
 
 const app=express();
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 const port=process.env.PORT || 8000;

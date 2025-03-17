@@ -14,7 +14,7 @@ const Login = ({setisAuthenticated}) => {
     e.preventDefault();
     
     try {
-      const response = await axios.post("https://job-board-pbyz.onrender.com//login", { email, password });
+      const response = await axios.post("https://job-board-pbyz.onrender.com/login", { email, password });
 
       if (response.data.message) {
         const recruiterId = response.data.recruiterId;
